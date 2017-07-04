@@ -64,7 +64,7 @@ namespace Project78
             // data adapter making request from our connection
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
 
-            if (getDateVanAfstandsensoor() > 1 && getDateVanAfstandsensoor() < 400)
+            if (getDateVanAfstandsensoor() > 1 && getDateVanAfstandsensoor() < 200)
             {
             string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + getDateVanAfstandsensoor() + "   ,  '1' ) ";
 
@@ -81,8 +81,8 @@ namespace Project78
             
             chart1.DataSource = dt;
 
-
-
+            chart1.ChartAreas[0].AxisY.Minimum = 0;
+            chart1.ChartAreas[0].AxisY.Maximum = 100;
 
         }
         public void fillChart() {
@@ -159,10 +159,11 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
         SerialPort sp = new SerialPort("COM4");
 
-        sp.Open();
+        
             int a = 0;
             try
             {
+                sp.Open();
                  a = Convert.ToInt32(sp.ReadLine());
             }
             catch (Exception ex)
