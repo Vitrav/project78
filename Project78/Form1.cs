@@ -11,6 +11,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.IO.Ports;
 
 namespace Project78
 {
@@ -21,6 +23,7 @@ namespace Project78
         public Form1()
         {
             InitializeComponent();
+
             connectAndPrepare();
             fillChart();
         }
@@ -35,7 +38,7 @@ namespace Project78
         {
 
             string connstring = String.Format("Server=localhost;Port=5432;" +
-                "User Id=postgres;Password=132132;Database=project78;");
+                "User Id=postgres;Password=;Database=project78;");
 
             // Connectie maken met de connstring
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -58,13 +61,18 @@ namespace Project78
 
             // data adapter making request from our connection
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
+
+            string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + getDateVanAfstandsensoor() + "   ,  '1' ) ";
+
+            NpgsqlCommand dc1 = new NpgsqlCommand(sql2, conn);
+            dc1.ExecuteNonQuery();
             
             ds.Reset();
             // Data vullen uit de adapter
             da.Fill(ds);
             // Eerste table kiezen
             dt = ds.Tables[0];
-
+            
             chart1.DataSource = dt;
 
 
@@ -111,11 +119,33 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
 
         private void button1_Click(object sender, EventArgs e)
         {
-       
-            fillChart();
+            connectAndPrepare();
+            this.chart1.Update();
+            this.chart1.
             
 
         }
 
+
+        private int getDateVanAfstandsensoor()
+        {
+        SerialPort sp = new SerialPort("COM4");
+
+        sp.Open();
+            
+
+        int a =  Convert.ToInt32(sp.ReadLine());
+
+         sp.Close();
+
+            return a;
+        
+        }
+
+
+        private void insertDataInDb()
+        {
+
+        }
     }
 }
