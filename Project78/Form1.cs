@@ -23,9 +23,10 @@ namespace Project78
         public Form1()
         {
             InitializeComponent();
-
+            
             connectAndPrepare();
-            fillChart();
+                //fillChart();
+            fillLastIteamChart();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -49,7 +50,8 @@ namespace Project78
                 // PostgeSQL-style connection string
 
                 conn.Open();
-                MessageBox.Show("Connectie gelukt");
+                //MessageBox.Show("Connectie gelukt");
+                Console.WriteLine("connection gelukt");
             }
             catch (Exception ex)
             {
@@ -62,10 +64,14 @@ namespace Project78
             // data adapter making request from our connection
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
 
+            if (getDateVanAfstandsensoor() > 1 && getDateVanAfstandsensoor() < 400)
+            {
             string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + getDateVanAfstandsensoor() + "   ,  '1' ) ";
 
             NpgsqlCommand dc1 = new NpgsqlCommand(sql2, conn);
             dc1.ExecuteNonQuery();
+            }
+            
             
             ds.Reset();
             // Data vullen uit de adapter
@@ -80,7 +86,6 @@ namespace Project78
 
         }
         public void fillChart() {
-            
             
             // Loopt over elke row in de DataSet tables
             foreach (DataRow row in ds.Tables[0].Rows)
@@ -97,7 +102,24 @@ namespace Project78
             }
 }
 
+        public void fillLastIteamChart()
+        {
+            int x = ds.Tables[0].Rows.Count;
+            DataRow row = ds.Tables[0].Rows[x-1];
 
+            
+                int voorraadInt = Convert.ToInt32(row["voorraad"]);
+                String schapNaam = row["schap"].ToString();
+
+                // Voor elke row pakt hij de "schap" en "voorraad" en zet deze in de chart
+                this.chart1.Series["Voorraad"].Points.AddXY(row["schap"].ToString(), row["voorraad"].ToString());
+
+                if (voorraadInt <= 6)
+                {
+                    MessageBox.Show("BIJNA LEEG SCHAP:   " + schapNaam);
+                }
+            
+        }
 
 
 
@@ -119,10 +141,16 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
 
         private void button1_Click(object sender, EventArgs e)
         {
+            while (true)
+            {
             connectAndPrepare();
             this.chart1.Update();
-            this.chart1.
+            this.chart1.Series["Voorraad"].Points.Clear();
+            fillLastIteamChart();
+            }
             
+
+
 
         }
 
@@ -132,9 +160,17 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         SerialPort sp = new SerialPort("COM4");
 
         sp.Open();
-            
+            int a = 0;
+            try
+            {
+                 a = Convert.ToInt32(sp.ReadLine());
+            }
+            catch (Exception ex)
+            {
 
-        int a =  Convert.ToInt32(sp.ReadLine());
+                Console.WriteLine(ex);
+            }
+        
 
          sp.Close();
 
