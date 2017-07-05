@@ -64,15 +64,42 @@ namespace Project78
             // data adapter making request from our connection
             NpgsqlDataAdapter da = new NpgsqlDataAdapter(sql, conn);
 
-            if (getDateVanAfstandsensoor() > 1 && getDateVanAfstandsensoor() < 200)
+            if (getDateVanAfstandsensoor() > 1 && getDateVanAfstandsensoor() <= 50)
             {
-            string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + getDateVanAfstandsensoor() + "   ,  '1' ) ";
+                
+                int x =100 - (100 / 50 * getDateVanAfstandsensoor());
+
+            string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + x + "   ,  'actie schap' ) ";
 
             NpgsqlCommand dc1 = new NpgsqlCommand(sql2, conn);
             dc1.ExecuteNonQuery();
             }
-            
-            
+
+
+            if (getDateVanLichtsensoor() >= 1 && getDateVanLichtsensoor() <= 10000)
+            {
+
+                int x =  getDateVanLichtsensoor() -200 ;
+                if (x < 0)
+                {
+                    x = (x - x) +99;
+                }
+                else
+                {
+                    x = 100- (x / 5);
+                }
+
+
+
+                string sql2 = "insert into voorraadbeheer ( voorraad , schap) values (" + x + "   ,  'actie schap' ) ";
+
+                NpgsqlCommand dc1 = new NpgsqlCommand(sql2, conn);
+                dc1.ExecuteNonQuery();
+            }
+
+
+
+
             ds.Reset();
             // Data vullen uit de adapter
             da.Fill(ds);
@@ -83,7 +110,7 @@ namespace Project78
 
             chart1.ChartAreas[0].AxisY.Minimum = 0;
             chart1.ChartAreas[0].AxisY.Maximum = 100;
-
+            chart1.ChartAreas[0].AxisY.Title = "Voorraad in %";
         }
         public void fillChart() {
             
@@ -94,7 +121,7 @@ namespace Project78
                 String schapNaam = row["schap"].ToString();
 
                 // Voor elke row pakt hij de "schap" en "voorraad" en zet deze in de chart
-                this.chart1.Series["Voorraad"].Points.AddXY(row["schap"].ToString(), row["voorraad"].ToString());
+                this.chart1.Series["Voorraad"].Points.AddXY(row["schap"].ToString() , row["voorraad"].ToString());
                 if (voorraadInt <= 6)
                 {
                     MessageBox.Show("BIJNA LEEG SCHAP:   " + schapNaam);
@@ -114,7 +141,7 @@ namespace Project78
                 // Voor elke row pakt hij de "schap" en "voorraad" en zet deze in de chart
                 this.chart1.Series["Voorraad"].Points.AddXY(row["schap"].ToString(), row["voorraad"].ToString());
 
-                if (voorraadInt <= 6)
+                if (voorraadInt < 20)
                 {
                     MessageBox.Show("BIJNA LEEG SCHAP:   " + schapNaam);
                 }
@@ -147,6 +174,8 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
             this.chart1.Update();
             this.chart1.Series["Voorraad"].Points.Clear();
             fillLastIteamChart();
+
+                getDateVanLichtsensoor();
             }
             
 
@@ -179,10 +208,48 @@ private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         
         }
 
+        private int getDateVanLichtsensoor()
+        {
+            SerialPort sp = new SerialPort("COM3",19200);
 
+
+            int a = 0;
+            try
+            {
+                sp.Open();
+                // Console.Out.WriteLine("test : "+ sp.ReadLine().GetType());
+
+                Console.Out.WriteLine(sp.ReadLine());
+                a = Convert.ToInt32(sp.ReadLine());
+            }
+            catch (Exception ex)
+            {
+
+                Console.Out.WriteLine(ex);
+            }
+
+
+            sp.Close();
+
+            return a;
+
+        }
         private void insertDataInDb()
         {
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            while (true)
+            {
+                connectAndPrepare();
+                this.chart1.Update();
+                this.chart1.Series["Voorraad"].Points.Clear();
+                fillLastIteamChart();
+
+                getDateVanLichtsensoor();
+            }
         }
     }
 }
